@@ -26,7 +26,7 @@ const (
 	VerboseFlag            = "verbose"
 
 	ComposeProjectNamePrefixFlag         = "compose-project-name-prefix"
-	ComposeProjectNamePrefixDefaultValue = "ecscompose-"
+	ComposeProjectNamePrefixDefaultValue = ""
 	ComposeServiceNamePrefixFlag         = "compose-service-name-prefix"
 	ComposeServiceNamePrefixDefaultValue = ComposeProjectNamePrefixDefaultValue + "service-"
 	CFNStackNamePrefixFlag               = "cfn-stack-name-prefix"

@@ -47,6 +47,7 @@ func TestConvertToTaskDefinition(t *testing.T) {
 	securityOpts := []string{"label:type:test_virt"}
 	user := "user"
 	workingDir := "/var"
+	restart := false
 
 	serviceConfig := &config.ServiceConfig{
 		CPUShares:   yaml.StringorInt(cpu),
@@ -56,6 +57,7 @@ func TestConvertToTaskDefinition(t *testing.T) {
 		Links:       links,
 		MemLimit:    yaml.MemStringorInt(int64(1048576) * memory), //1 MiB = 1048576B
 		Privileged:  privileged,
+		Restart:	 restart,
 		ReadOnly:    readOnly,
 		SecurityOpt: securityOpts,
 		User:        user,
@@ -88,8 +90,13 @@ func TestConvertToTaskDefinition(t *testing.T) {
 	if !reflect.DeepEqual(links, aws.StringValueSlice(containerDef.Links)) {
 		t.Errorf("Expected links [%v] But was [%v]", links, aws.StringValueSlice(containerDef.Links))
 	}
-	if memory != aws.Int64Value(containerDef.Memory) {
+	//Hardlimit
+	/*if memory != aws.Int64Value(containerDef.Memory) {
 		t.Errorf("Expected memory [%s] But was [%s]", memory, aws.Int64Value(containerDef.Memory))
+	}*/
+	//Softlimit
+	if memory != aws.Int64Value(containerDef.MemoryReservation) {
+		t.Errorf("Expected memory [%s] But was [%s]", memory, aws.Int64Value(containerDef.MemoryReservation))
 	}
 	if privileged != aws.BoolValue(containerDef.Privileged) {
 		t.Errorf("Expected privileged [%s] But was [%s]", privileged, aws.BoolValue(containerDef.Privileged))
@@ -102,6 +109,9 @@ func TestConvertToTaskDefinition(t *testing.T) {
 	}
 	if workingDir != aws.StringValue(containerDef.WorkingDirectory) {
 		t.Errorf("Expected WorkingDirectory [%s] But was [%s]", workingDir, aws.StringValue(containerDef.WorkingDirectory))
+	}
+	if restart != aws.BoolValue(containerDef.Restart) {
+		t.Errorf("Expected restart [%s] But was [%s]", restart, aws.BoolValue(containerDef.Restart))
 	}
 }
 
@@ -533,6 +543,7 @@ func TestIsZeroWhenConfigHasValues(t *testing.T) {
 		"Links":       true,
 		"MemLimit":    true,
 		"Privileged":  true,
+		"Restart":	   false,
 		"ReadOnly":    true,
 		"SecurityOpt": true,
 		"User":        true,
@@ -548,6 +559,7 @@ func TestIsZeroWhenConfigHasValues(t *testing.T) {
 		MemLimit:    yaml.MemStringorInt(int64(104857600)),
 		Privileged:  true,
 		ReadOnly:    true,
+		Restart:	 false,
 		SecurityOpt: []string{"label:type:test_virt"},
 		User:        "user",
 		WorkingDir:  "/var",

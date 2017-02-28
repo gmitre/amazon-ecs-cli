@@ -43,7 +43,7 @@ var supportedComposeYamlOptions = []string{
 	"cpu_shares", "command", "dns", "dns_search", "entrypoint", "env_file",
 	"environment", "extra_hosts", "hostname", "image", "labels", "links",
 	"logging", "log_driver", "log_opt", "mem_limit", "ports", "privileged", "read_only",
-	"security_opt", "ulimits", "user", "volumes", "volumes_from", "working_dir",
+	"security_opt", "ulimits", "user", "volumes", "volumes_from", "working_dir", "restart",
 }
 
 var supportedComposeYamlOptionsMap = getSupportedComposeYamlOptionsMap()
@@ -218,13 +218,19 @@ func convertToContainerDef(context *project.Context, inputCfg *config.ServiceCon
 	outputContDef.EntryPoint = aws.StringSlice(inputCfg.Entrypoint)
 	outputContDef.Environment = environment
 	outputContDef.ExtraHosts = extraHosts
+	if inputCfg.Restart == "no" {
+		outputContDef.Essential = aws.Bool(false)
+	}
 	if inputCfg.Hostname != "" {
 		outputContDef.Hostname = aws.String(inputCfg.Hostname)
 	}
 	outputContDef.Image = aws.String(inputCfg.Image)
 	outputContDef.Links = aws.StringSlice(inputCfg.Links) //TODO, read from external links
 	outputContDef.LogConfiguration = logConfig
-	outputContDef.Memory = aws.Int64(mem)
+	//Hardlimit
+	//outputContDef.Memory = aws.Int64(mem)
+	//SoftLimit
+	outputContDef.MemoryReservation = aws.Int64(mem)
 	outputContDef.MountPoints = mountPoints
 	outputContDef.Privileged = aws.Bool(inputCfg.Privileged)
 	outputContDef.PortMappings = portMappings
